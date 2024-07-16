@@ -1,16 +1,29 @@
 /* eslint-disable react/no-unescaped-entities */
-import { Link } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
     
+    const navLink=useNavigate()
+
     const handleSubmit=(e)=>{
         e.preventDefault();
         const user=e.target.user.value;
+        if(!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(user) && isNaN(user))return toast.error('Enter a valid email or number')
         const pin=e.target.pin.value;
-        if(isNaN(pin))return alert('please enter number')
-
-        console.log(user,pin)
-        
+        if(isNaN(pin))return toast.error('pin must be a number')
+        const userInfo={user,pin}
+        axios.post('http://localhost:1000/Login',userInfo)
+        .then(data=>{
+            if(data.data.message==='Login successful'){
+                toast.success('Login successful')
+                e.target.reset()
+                navLink('/')
+            }
+            if(data.data.message==='Invalid credentials')toast.error('Invalid credentials')
+            if(data.data.message==='Invalid')toast.error('Please enter valid email or number')
+        }).catch(error=>console.log(error.message))
 
     }
 
@@ -51,7 +64,7 @@ const Login = () => {
                                 d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
                                 clipRule="evenodd" />
                         </svg>
-                        <input type="password" name="pin" className="grow" defaultValue={'password'} />
+                        <input type="password" name="pin" className="grow" placeholder="Pin number" />
                     </label>
 
                     <button className="btn btn-block bg-[#9290C3] border-0 text-white">Login</button>
